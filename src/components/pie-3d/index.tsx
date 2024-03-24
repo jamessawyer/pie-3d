@@ -60,7 +60,10 @@ const Pie3D: React.FC<Pie3DProps> = ({ data, radius, height }) => {
         allAngleAndRatio.forEach((item, index) => {
             if (item.ratio === 0) return
             //获取到饼图各个扇形网格
-            const currentHeight = item.ratio * maxHeight
+            // 这里高度根据比例变化
+            // const currentHeight = item.ratio * maxHeight
+            // 设置高度 这里写死
+            const currentHeight = maxHeight / 4
             singleMaxHeight = Math.max(singleMaxHeight, currentHeight)
             const sectorMesh = new SectorMesh(sectorRadius, currentHeight, 32, 1, false, item.startAngle, item.endAngle - item.startAngle, new Color(data[index].color))
             sectorGroup.add(sectorMesh)
@@ -79,9 +82,11 @@ const Pie3D: React.FC<Pie3DProps> = ({ data, radius, height }) => {
         //开始添加 Three.js 相关代码
         const canvas = canvasRef.current
 
-        const renderer = new WebGLRenderer({ canvas, antialias: true })
+        const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true })
+        // 清除背景色
+        renderer.setClearColor(0x000, 0)
         const scene = new Scene()
-        scene.background = new Color(0x666666)
+        // scene.background = new Color(0x666666ff)
         const camera = new PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000)
         camera.position.set(0, 1, 2)
 
@@ -109,6 +114,9 @@ const Pie3D: React.FC<Pie3DProps> = ({ data, radius, height }) => {
 
         const render = () => {
             renderer.render(scene, camera)
+            camera.updateProjectionMatrix()
+            // renderer.setSize(window.innerWidth, window.innerHeight)
+            renderer.setPixelRatio(window.devicePixelRatio)
             window.requestAnimationFrame(render)
         }
         window.requestAnimationFrame(render)
